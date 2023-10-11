@@ -149,10 +149,8 @@ Examples:
   # See https://github.com/databus23/helm-diff/issues/278 for more information.
   HELM_DIFF_IGNORE_UNKNOWN_FLAGS=true helm diff upgrade my-release stable/postgres --wait
 
-  # helm-diff uses helm-template without the cluster access by default.
-  # In case you need the cluster access, you use HELM_DIFF_USE_INSECURE_SERVER_SIDE_DRY_RUN
-  #
-  # Set HELM_DIFF_USE_INSECURE_SERVER_SIDE_DRY_RUN=true to
+  # helm-diff disallows the use of the `lookup` function by default.
+  # To enable it, you must set HELM_DIFF_USE_INSECURE_SERVER_SIDE_DRY_RUN=true to
   # use `helm template --dry-run=server` or
   # `helm upgrade --dry-run=server` (in case you also set `HELM_DIFF_USE_UPGRADE_DRY_RUN`)
   # See https://github.com/databus23/helm-diff/pull/458
