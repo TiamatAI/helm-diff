@@ -69,7 +69,24 @@ func (d *diffCmd) isAllowUnreleased() bool {
 	return d.allowUnreleased || d.install
 }
 
-func (d *diffCmd) isRemoteAccessAllowed() bool {
+// clusterAccessAllowed returns true if the diff command is allowed to access the cluster at some degree.
+//
+// helm-diff basically have 3 modes of operation:
+// 1. no cluster access at all when --dry-run, --dry-run=client, or --dry-run=true is specified.
+// 2. basic cluster access when --dry-run is not specified.
+// 3. extra cluster access when --dry-run=server is specified.
+//
+// clusterAccessAllowed returns true when the mode is either 2 or 3.
+//
+// If false, helm-diff should not access the cluster at all.
+// More concretely:
+// - It shouldn't pass --validate to helm-template because it requires cluster access.
+// - It shouldn't get the current release manifest using helm-get-manifest because it requires cluster access.
+// - It shouldn't get the current release hooks using helm-get-hooks because it requires cluster access.
+// - It shouldn't get the current release values using helm-get-values because it requires cluster access.
+//
+// See also https://github.com/helm/helm/pull/9426#discussion_r1181397259
+func (d *diffCmd) clusterAccessAllowed() bool {
 	clientOnly := (d.dryRunModeSpecified && d.dryRunMode == "") || d.dryRunMode == "true" || d.dryRunMode == "client"
 	return !clientOnly
 }
@@ -279,7 +296,7 @@ func (d *diffCmd) runHelm3() error {
 
 	var err error
 
-	if d.isRemoteAccessAllowed() {
+	if d.clusterAccessAllowed() {
 		releaseManifest, err = getRelease(d.release, d.namespace)
 	}
 
@@ -326,7 +343,7 @@ func (d *diffCmd) runHelm3() error {
 	}
 
 	currentSpecs := make(map[string]*manifest.MappingResult)
-	if !newInstall && d.isRemoteAccessAllowed() {
+	if !newInstall && d.clusterAccessAllowed() {
 		if !d.noHooks && !d.threeWayMerge {
 			hooks, err := getHooks(d.release, d.namespace)
 			if err != nil {

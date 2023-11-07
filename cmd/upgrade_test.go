@@ -49,7 +49,7 @@ func TestIsRemoteAccessAllowed(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := tc.cmd.isRemoteAccessAllowed()
+			actual := tc.cmd.clusterAccessAllowed()
 			if actual != tc.expected {
 				t.Errorf("Expected %v, got %v", tc.expected, actual)
 			}
