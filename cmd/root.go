@@ -4,6 +4,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
@@ -29,6 +30,8 @@ The Helm Diff Plugin
   want to rollback. This can be used visualize what changes a
   helm rollback will perform.
 `
+
+var timeout time.Duration
 
 // New creates a new cobra client
 func New() *cobra.Command {
@@ -77,6 +80,9 @@ func New() *cobra.Command {
 			return chartCommand.RunE(cmd, args)
 		},
 	}
+
+	// ZWF: 添加这个参数是为了跟 helm upgrade 命令兼容, 无实际意义;
+	cmd.PersistentFlags().DurationVar(&timeout, "timeout", 5*time.Minute, "ZWF: time to wait for any individual Kubernetes operation (like Jobs for hooks) (default 5m0s)")
 
 	// add no-color as global flag
 	cmd.PersistentFlags().Bool("no-color", false, "remove colors from the output. If both --no-color and --color are unspecified, coloring enabled only when the stdout is a term and TERM is not \"dumb\"")
